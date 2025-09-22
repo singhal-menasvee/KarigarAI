@@ -37,6 +37,8 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import ArtisanDetailsTable from "./ArtisanDetailsTable";
+
 import {
   BarChart,
   Bar,
@@ -59,9 +61,7 @@ const dashboardStats = {
   monthlyGrowth: 12.5
 };
 
-const ArtisanDetailsTable = () => (
-  <div>Artisan Details Table Component</div>
-);
+
 
 const drawerWidth = 240;
 
