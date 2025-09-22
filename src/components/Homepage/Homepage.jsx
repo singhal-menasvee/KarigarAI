@@ -1,4 +1,6 @@
 import React from 'react';
+import heroBackground from '../../assets/images/4.jpg';
+
 import {
   Box,
   Container,
@@ -24,13 +26,18 @@ const Homepage = ({ setCurrentPage }) => {
     <Box>
       {/* Hero Section */}
       <Paper
-        sx={{
-          background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(59, 130, 246, 0.08))',
-          py: 8,
-          mb: 6,
-          textAlign: 'center',
-        }}
-      >
+  sx={{
+    backgroundImage: `url(${heroBackground})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    py: 10,
+    mb: 6,
+    textAlign: 'center',
+    
+  }}
+>
+
         <Container maxWidth="md">
           <Typography variant="h4" color="primary" gutterBottom>
             Embrace the spirit of India

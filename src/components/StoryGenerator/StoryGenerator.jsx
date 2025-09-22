@@ -96,7 +96,7 @@ const StoryGenerator = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                select
+               
                 label="Craft Type"
                 name="craftType"
                 value={formData.craftType}
