@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   TextField,
   Box,
@@ -16,40 +15,77 @@ import {
   Avatar,
 } from '@mui/material';
 import { Close as CloseIcon, Send as SendIcon } from '@mui/icons-material';
+import axios from 'axios';
+
+const knowledgeBase = [
+  { q: "kyc", a: "KYC means Know Your Customer — banks use it to verify identity." },
+  { q: "open account", a: "You can open an account online or at a branch with KYC documents." },
+  { q: "interest rate", a: "Savings accounts earn 3.5% annual interest currently." },
+  { q: "credit card", a: "You can apply for a credit card from your bank's portal once KYC is done." },
+];
+
+const HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B";
+const HF_TOKEN = import.meta.env.VITE_HF_TOKEN; 
 
 const ChatModal = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! Welcome to CraftStory. How can I help you today?",
+      text: "Hello! I'm your AI assistant. How can I help you today?",
       sender: 'support',
       timestamp: new Date().toLocaleTimeString(),
-    }
+    },
   ]);
   const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const message = {
-        id: messages.length + 1,
-        text: newMessage,
-        sender: 'user',
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      setMessages([...messages, message]);
-      setNewMessage('');
-
-      // Simulate support response
-      setTimeout(() => {
-        const supportResponse = {
-          id: messages.length + 2,
-          text: "Thank you for your message. Our support team will get back to you shortly!",
-          sender: 'support',
-          timestamp: new Date().toLocaleTimeString(),
-        };
-        setMessages(prev => [...prev, supportResponse]);
-      }, 1000);
+  const searchKnowledge = (query) => {
+    const text = query.toLowerCase();
+    for (const item of knowledgeBase) {
+      if (text.includes(item.q)) return item.a;
     }
+    return null;
+  };
+
+  const askModel = async (query) => {
+    try {
+      const res = await axios.post(
+        HF_API_URL,
+        { inputs: query },
+        { headers: { Authorization: `Bearer ${HF_TOKEN}` } }
+      );
+      return res.data?.[0]?.generated_text || "Sorry, I’m not sure about that.";
+    } catch (e) {
+      return "⚠️ There was an issue contacting the AI model.";
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    const userMessage = {
+      id: messages.length + 1,
+      text: newMessage,
+      sender: 'user',
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setNewMessage('');
+    setLoading(true);
+
+    let reply = searchKnowledge(newMessage);
+    if (!reply) reply = await askModel(newMessage);
+
+    const botReply = {
+      id: messages.length + 2,
+      text: reply,
+      sender: 'support',
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    setMessages((prev) => [...prev, botReply]);
+    setLoading(false);
   };
 
   const handleKeyPress = (e) => {
@@ -66,17 +102,17 @@ const ChatModal = ({ isOpen, onClose }) => {
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        sx: { borderRadius: 2, height: '600px', display: 'flex', flexDirection: 'column' }
+        sx: { borderRadius: 2, height: '600px', display: 'flex', flexDirection: 'column' },
       }}
     >
       <DialogTitle sx={{ pb: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'primary.main' }}>C</Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>A</Avatar>
             <Box>
-              <Typography variant="h6">CraftStory Support</Typography>
+              <Typography variant="h6">AI Chat Assistant</Typography>
               <Typography variant="body2" color="text.secondary">
-                Typically replies in a few minutes
+                Ask me anything or about your project
               </Typography>
             </Box>
           </Box>
@@ -87,40 +123,47 @@ const ChatModal = ({ isOpen, onClose }) => {
       </DialogTitle>
 
       <DialogContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 0 }}>
-        {/* Messages Area */}
+        {/* Messages */}
         <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto' }}>
           <List>
-            {messages.map((message) => (
+            {messages.map((m) => (
               <ListItem
-                key={message.id}
+                key={m.id}
                 sx={{
-                  justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
-                  mb: 1
+                  justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start',
+                  mb: 1,
                 }}
               >
                 <Paper
                   sx={{
                     p: 2,
                     maxWidth: '70%',
-                    bgcolor: message.sender === 'user' ? 'primary.main' : 'grey.100',
-                    color: message.sender === 'user' ? 'white' : 'text.primary',
+                    bgcolor: m.sender === 'user' ? 'primary.main' : 'grey.100',
+                    color: m.sender === 'user' ? 'white' : 'text.primary',
                   }}
                 >
                   <ListItemText
-                    primary={message.text}
+                    primary={m.text}
                     secondary={
                       <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                        {message.timestamp}
+                        {m.timestamp}
                       </Typography>
                     }
                   />
                 </Paper>
               </ListItem>
             ))}
+            {loading && (
+              <ListItem>
+                <Paper sx={{ p: 2, bgcolor: 'grey.100', color: 'text.primary' }}>
+                  <Typography variant="body2">Typing...</Typography>
+                </Paper>
+              </ListItem>
+            )}
           </List>
         </Box>
 
-        {/* Message Input */}
+        {/* Input */}
         <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
@@ -137,7 +180,7 @@ const ChatModal = ({ isOpen, onClose }) => {
             <IconButton
               onClick={handleSendMessage}
               color="primary"
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || loading}
               sx={{ alignSelf: 'flex-end' }}
             >
               <SendIcon />
