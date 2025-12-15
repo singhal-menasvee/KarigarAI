@@ -6,37 +6,21 @@ const API_TOKEN = import.meta.env.VITE_HF_TOKEN;
 const MODEL_ID = "meta-llama/Llama-3.2-3B-Instruct";
 
 export const aiService = {
-    /**
-     * Chat with the AI, using KB context if available.
-     * @param {string} userMessage - The user's input message.
-     * @param {Array} history - Previous message history (optional).
-     * @returns {Promise<string>} - The AI's response.
-     */
-    /**
-     * Chat with the AI, using KB context if available.
-     * @param {string} userMessage - The user's input message.
-     * @param {Array} history - Previous message history (optional).
-     * @param {string} language - 'en' or 'hi' (default 'en').
-     * @returns {Promise<string>} - The AI's response.
-     */
     async chatWithAI(userMessage, history = [], language = 'en') {
-        // 1. Check Knowledge Base first (only for English for now, or simple keyword match)
         const kbAnswer = findAnswer(userMessage);
         if (kbAnswer) {
-            // In future, we could translate this too. For now, return as is.
             return kbAnswer;
         }
 
-        // 2. Fallback to API
         if (!API_TOKEN) {
-            return "⚠️ API Token is missing. Please add VITE_HF_TOKEN to your .env file.";
+            return "The API token is missing. Please ensure VITE_HF_TOKEN is correctly set in your environment configuration.";
         }
 
         try {
-            let systemPrompt = "You are a helpful AI assistant for Indian artisans. You help them with banking, selling products, and storytelling. Keep answers simple and encouraging.";
+            let systemPrompt = "You are a helpful assistant for Indian artisans, assisting with banking queries, product sales, and storytelling. Please keep your responses clear and supportive.";
 
             if (language === 'hi') {
-                systemPrompt += " Reply in Hindi (Devanagari script). Keep the language simple and conversational.";
+                systemPrompt += " Please reply in Hindi using the Devanagari script, keeping the language simple and conversational.";
             }
 
             const messages = [
@@ -65,29 +49,23 @@ export const aiService = {
         } catch (error) {
             console.error("AI API Error:", error);
             if (error.response) {
-                return `Error: ${error.response.status} - ${error.response.data.error?.message || "Unknown error"}`;
+                return `We encountered an issue: ${error.response.status} - ${error.response.data.error?.message || "An unknown error occurred."}`;
             }
-            return "Sorry, I'm having trouble connecting to the AI server right now. Please try again later.";
+            return "I am unable to connect to the server at the moment. Please try again in a little while.";
         }
     },
 
-    /**
-     * Generate a creative story for a product.
-     * @param {Object} details - Product details (craft, material, etc.).
-     * @param {string} language - 'en' or 'hi' (default 'en').
-     * @returns {Promise<string>} - Generated story.
-     */
     async generateStory(details, language = 'en') {
         if (!API_TOKEN) {
-            return "⚠️ API Token is missing. Please add VITE_HF_TOKEN to your .env file.";
+            return "The API token is missing. Please ensure VITE_HF_TOKEN is correctly set in your environment configuration.";
         }
 
         const { artisanName, craftType, location, materials, inspiration } = details;
 
-        let systemMessage = "You are an expert storyteller for handmade crafts. Write short, emotional, marketing-focused product stories.";
+        let systemMessage = "You are an expert storyteller for handmade crafts. Please create short, emotionally engaging stories suitable for marketing.";
 
         if (language === 'hi') {
-            systemMessage += " Write the story in Hindi (Devanagari script). Use emotional and poetic words suitable for Indian handicrafts.";
+            systemMessage += " Please write the story in Hindi using the Devanagari script, utilizing emotional and poetic language suitable for Indian handicrafts.";
         }
 
         const userPrompt = `Write a story for a handmade product with these details:
@@ -97,7 +75,7 @@ export const aiService = {
     - Materials: ${materials}
     - Inspiration: ${inspiration}
     
-    The story should highlight the effort, tradition, and cultural value. Keep it under 150 words.`;
+    The story should highlight the effort, tradition, and cultural value. Please keep it under 150 words.`;
 
         try {
             const response = await axios.post(
@@ -122,7 +100,7 @@ export const aiService = {
             return response.data.choices[0].message.content.trim();
         } catch (error) {
             console.error("Story Generation Error:", error);
-            return "Could not generate story automatically. Please check your internet connection or API token.";
+            return "I could not generate the story automatically. Please check your internet connection and try again.";
         }
     }
 };
