@@ -11,9 +11,13 @@ import {
   CardContent,
   IconButton,
   Alert,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { sampleData } from '../../utils/data';
+import { aiService } from '../../services/aiService';
 
 const StoryGenerator = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +33,7 @@ const StoryGenerator = () => {
   const [generatedStory, setGeneratedStory] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [language, setLanguage] = useState('en');
 
   const handleInputChange = (e) => {
     setFormData({
@@ -41,26 +46,11 @@ const StoryGenerator = () => {
     e.preventDefault();
     setIsGenerating(true);
     setCopied(false);
-    
-    // Simulate AI processing
-    setTimeout(() => {
-      const template = sampleData.storyTemplates[Math.floor(Math.random() * sampleData.storyTemplates.length)];
-      const story = template
-        .replace('{craftType}', formData.craftType || 'handcrafted')
-        .replace('{experience}', formData.experience || '10')
-        .replace('{technique}', formData.techniques || 'traditional methods')
-        .replace('{location}', formData.location || 'India')
-        .replace('{product}', formData.productType || 'piece')
-        .replace('{inspiration}', formData.inspiration || 'cultural heritage')
-        .replace('{tradition}', formData.craftType || 'ancient traditions')
-        .replace('{materials}', formData.materials || 'finest materials')
-        .replace('{artisanName}', formData.artisanName || 'our skilled artisan')
-        .replace('{timeSpent}', 'countless hours')
-        .replace('{craft}', formData.craftType || 'traditional craft');
-      
-      setGeneratedStory(story);
-      setIsGenerating(false);
-    }, 2000);
+
+    // Call AI Service
+    const story = await aiService.generateStory(formData, language);
+    setGeneratedStory(story);
+    setIsGenerating(false);
   };
 
   const copyToClipboard = () => {
@@ -71,13 +61,24 @@ const StoryGenerator = () => {
 
   return (
     <Container maxWidth="md">
-      <Box sx={{ textAlign: 'center', mb: 4 }}>
+      <Box sx={{ textAlign: 'center', mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography variant="h2" component="h1" gutterBottom>
           AI Story Generator
         </Typography>
-        <Typography variant="h6" color="text.secondary">
+        <Typography variant="h6" color="text.secondary" gutterBottom>
           Transform your craft details into compelling stories that connect with customers
         </Typography>
+        <FormControl size="small" variant="outlined" sx={{ mt: 2, minWidth: 120 }}>
+          <InputLabel>Language</InputLabel>
+          <Select
+            value={language}
+            label="Language"
+            onChange={(e) => setLanguage(e.target.value)}
+          >
+            <MenuItem value="en">English (US)</MenuItem>
+            <MenuItem value="hi">Hindi (हिंदी)</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
 
       <Paper sx={{ p: 4, mb: 4 }}>
@@ -96,7 +97,7 @@ const StoryGenerator = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-               
+
                 label="Craft Type"
                 name="craftType"
                 value={formData.craftType}
@@ -189,7 +190,7 @@ const StoryGenerator = () => {
             disabled={isGenerating}
             sx={{ mt: 3 }}
           >
-            {isGenerating ? 'Generating Story...' : 'Generate AI Story'}
+            {isGenerating ? (language === 'hi' ? 'कहानी बना रहा हूँ...' : 'Generating Story...') : (language === 'hi' ? 'कहानी बनाएं' : 'Generate AI Story')}
           </Button>
         </form>
       </Paper>
@@ -204,7 +205,7 @@ const StoryGenerator = () => {
               </IconButton>
             </Box>
             {copied && <Alert severity="success" sx={{ mb: 2 }}>Story copied to clipboard!</Alert>}
-            <Typography variant="body1" paragraph>
+            <Typography variant="body1" paragraph sx={{ whiteSpace: 'pre-line' }}>
               {generatedStory}
             </Typography>
           </CardContent>
