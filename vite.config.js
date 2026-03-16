@@ -14,6 +14,15 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/hf/, ''),
       },
+    // allow ngrok host
+    allowedHosts: [
+      'all'
+    ],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5001',
+        changeOrigin: true
+      }
     }
   }
 })

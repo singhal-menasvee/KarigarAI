@@ -67,7 +67,7 @@ const Navigation = ({ currentPage, setCurrentPage }) => {
             }}
             onClick={() => setCurrentPage('home')}
           >
-            CraftStory
+            KarigarAI
           </Typography>
 
           {isMobile ? (
