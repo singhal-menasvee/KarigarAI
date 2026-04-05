@@ -15,6 +15,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 
 const Navigation = ({ currentPage, setCurrentPage }) => {
   const theme = useTheme();
@@ -80,7 +81,7 @@ const Navigation = ({ currentPage, setCurrentPage }) => {
               <MenuIcon />
             </IconButton>
           ) : (
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               {navItems.map((item) => (
                 <Button
                   key={item.value}
@@ -93,6 +94,23 @@ const Navigation = ({ currentPage, setCurrentPage }) => {
                   {item.label}
                 </Button>
               ))}
+              <SignedOut>
+                <Button
+                  variant="outlined"
+                  onClick={() => setCurrentPage('login')}
+                >
+                  Log in
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => setCurrentPage('signup')}
+                >
+                  Sign up
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
             </Box>
           )}
         </Toolbar>

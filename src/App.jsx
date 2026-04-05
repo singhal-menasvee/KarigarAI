@@ -7,6 +7,8 @@ import Homepage from './components/Homepage/Homepage';
 import StoryGenerator from './components/StoryGenerator/StoryGenerator';
 import Marketplace from './components/Marketplace/Marketplace';
 import Dashboard from './components/Dashboard/Dashboard';
+import LoginPage from './components/LoginPage/LoginPage';
+import SignUpPage from './components/SignUpPage/SignUpPage';
 import ProductModal from './components/ProductModal/ProductModal';
 import ChatModal from './components/ChatModal/ChatModal';
 import Footer from './components/Footer/Footer';
@@ -29,6 +31,10 @@ function App() {
         return <StoryGenerator />;
       case 'dashboard':
         return <Dashboard />;
+      case 'login':
+        return <LoginPage />;
+      case 'signup':
+        return <SignUpPage />;
       default:
         return <Homepage setCurrentPage={setCurrentPage} />;
     }

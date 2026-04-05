@@ -11,11 +11,10 @@ import {
   CardContent,
   Paper,
 } from '@mui/material';
-// import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/clerk-react';
 
 const Homepage = ({ setCurrentPage }) => {
-  // const { user } = useUser();
-  const user = { firstName: "Guest" }; // Mock user
+  const { user } = useUser() || {};
   const stats = [
     { number: '21+', label: 'States' },
     { number: '2000+', label: 'Artisans' },
@@ -68,8 +67,7 @@ const Homepage = ({ setCurrentPage }) => {
             </Button>
           </Box>
 
-          {/* Login Button for signed out users */}
-          {/* <SignedOut>
+          <SignedOut>
             <Box sx={{ mt: 2 }}>
               <SignInButton mode="modal">
                 <Button variant="contained" color="secondary" size="large">
@@ -77,24 +75,23 @@ const Homepage = ({ setCurrentPage }) => {
                 </Button>
               </SignInButton>
             </Box>
-          </SignedOut> */}
+          </SignedOut>
 
-          {/* Dashboard button for signed in users */}
-          {/* <SignedIn> */}
-          <Box sx={{ mt: 2 }}>
-            <Button
-              variant="contained"
-              color="success"
-              size="large"
-              onClick={() => setCurrentPage('dashboard')}
-            >
-              Go to Dashboard
-            </Button>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Welcome back, {user?.firstName || user?.username}!
-            </Typography>
-          </Box>
-          {/* </SignedIn> */}
+          <SignedIn>
+            <Box sx={{ mt: 2 }}>
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+                onClick={() => setCurrentPage('dashboard')}
+              >
+                Go to Dashboard
+              </Button>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Welcome back, {user?.firstName || user?.username}!
+              </Typography>
+            </Box>
+          </SignedIn>
         </Container>
       </Paper>
 

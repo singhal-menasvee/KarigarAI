@@ -8,6 +8,7 @@ import { connectDb } from './config/db.js';
 import { initCloudinary } from './config/cloudinary.js';
 import productsRouter from './routes/products.js';
 import artisansRouter from './routes/artisans.js';
+import profileRouter from './routes/profile.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 const app = express();
@@ -34,6 +35,7 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/products', productsRouter);
 app.use('/api/artisans', artisansRouter);
+app.use('/api/profile', profileRouter);
 
 app.use(notFound);
 app.use(errorHandler);

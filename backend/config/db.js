@@ -10,6 +10,7 @@ export async function connectDb() {
 
   await mongoose.connect(uri, {
     autoIndex: process.env.NODE_ENV !== 'production',
+    family: 4,
   });
 
   // Helpful log in dev

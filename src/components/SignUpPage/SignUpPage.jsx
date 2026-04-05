@@ -15,27 +15,26 @@ const SignUpPage = () => {
       >
         <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
           <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Join CraftStory
+            Join KarigarAI
           </Typography>
           <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 3 }}>
             Create an account to start your artisan journey
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <SignUp 
-              routing="path"
-              path="/sign-up"
+            <SignUp
+              routing="virtual"
               signInUrl="/sign-in"
               appearance={{
                 elements: {
                   rootBox: {
                     width: '100%',
-                    maxWidth: '400px'
+                    maxWidth: '400px',
                   },
                   card: {
                     boxShadow: 'none',
-                    width: '100%'
-                  }
-                }
+                    width: '100%',
+                  },
+                },
               }}
             />
           </Box>
