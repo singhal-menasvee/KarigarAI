@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     // allow ngrok / external hosts
-    allowedHosts: ['all'],
+    allowedHosts: ['all', 'server.allowedHosts'],
     proxy: {
       '/api/hf': {
         target: 'https://router.huggingface.co',

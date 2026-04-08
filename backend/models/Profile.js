@@ -16,8 +16,8 @@ const profileSchema = new mongoose.Schema(
     profileImage: { type: String, default: '' },
     role: {
       type: String,
-      enum: ['user', 'artisan'],
-      default: 'user',
+      enum: ['user', 'buyer', 'artisan'],
+      default: 'buyer',
       index: true,
     },
     artisanId: {

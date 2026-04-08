@@ -1,5 +1,6 @@
 import express from 'express';
 import { validate } from '../middleware/validate.js';
+import { upload } from '../middleware/upload.js';
 import {
   bootstrapProfile,
   bootstrapProfileBodySchema,
@@ -7,8 +8,6 @@ import {
   getProfileQuerySchema,
   updateProfileByEmail,
   updateProfileBodySchema,
-  registerAsArtisan,
-  registerArtisanBodySchema,
 } from '../controllers/profileController.js';
 
 const router = express.Router();
@@ -20,10 +19,6 @@ router.post('/bootstrap', validate(bootstrapProfileBodySchema), bootstrapProfile
 router.get('/', validate(getProfileQuerySchema), getProfileByEmail);
 
 // PUT /api/profile?email=...
-router.put('/', validate(updateProfileBodySchema), updateProfileByEmail);
-
-// POST /api/profile/register-artisan
-router.post('/register-artisan', validate(registerArtisanBodySchema), registerAsArtisan);
+router.put('/', upload.single('profileImage'), validate(updateProfileBodySchema), updateProfileByEmail);
 
 export default router;
-

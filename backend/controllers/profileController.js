@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Profile } from '../models/Profile.js';
-import { Artisan } from '../models/Artisan.js';
+import { uploadBufferToCloudinary } from '../middleware/upload.js';
 
 const emailSchema = z.string().email().trim().toLowerCase().max(254);
 
@@ -28,7 +28,7 @@ export async function bootstrapProfile(req, res, next) {
           address: '',
           bio: '',
           profileImage: '',
-          role: 'user',
+          role: 'buyer',
         },
       },
       { new: true, upsert: true }
@@ -76,10 +76,10 @@ export const updateProfileBodySchema = z.object({
     email: emailSchema,
   }),
   body: z.object({
-    username: z.string().trim().min(2).max(120).optional(),
-    phone: z.string().trim().max(30).optional(),
-    address: z.string().trim().max(400).optional(),
-    bio: z.string().trim().max(2000).optional(),
+    username: z.string().regex(/^[a-zA-Z0-9 ]+$/, "Only letters, numbers, and spaces allowed").trim().min(3).max(120).optional(),
+    phone: z.string().regex(/^\d{10}$/, "Phone number must be exactly 10 digits").optional(),
+    address: z.string().trim().min(5).max(200).optional(),
+    bio: z.string().trim().max(300).optional(),
     profileImage: z.string().url().optional(),
   }),
   params: z.any().optional(),
@@ -88,7 +88,15 @@ export const updateProfileBodySchema = z.object({
 export async function updateProfileByEmail(req, res, next) {
   try {
     const { email } = req.validated.query;
-    const updates = req.validated.body;
+    const updates = { ...req.validated.body };
+
+    if (req.file) {
+      if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        return res.status(500).json({ error: { message: 'Cloudinary not configured on server' } });
+      }
+      const uploadResult = await uploadBufferToCloudinary({ buffer: req.file.buffer, folder: 'karigarai/profiles' });
+      updates.profileImage = uploadResult.secure_url;
+    }
 
     const updated = await Profile.findOneAndUpdate(
       { email },
@@ -102,83 +110,6 @@ export async function updateProfileByEmail(req, res, next) {
 
     return res.json(updated);
   } catch (err) {
-    next(err);
-  }
-}
-
-export const registerArtisanBodySchema = z.object({
-  body: z.object({
-    email: emailSchema,
-    name: z.string().trim().min(2).max(120),
-    location: z.string().trim().max(120).optional().default(''),
-    craftTypes: z.array(z.string().trim().min(1).max(50)).optional().default([]),
-    profileImage: z.string().url().optional().default(''),
-    bio: z.string().trim().max(2000).optional().default(''),
-  }),
-  query: z.any().optional(),
-  params: z.any().optional(),
-});
-
-export async function registerAsArtisan(req, res, next) {
-  try {
-    const { email, name, location, craftTypes, profileImage, bio } = req.validated.body;
-
-    // Ensure profile exists (idempotent)
-    const profile = await Profile.findOneAndUpdate(
-      { email },
-      {
-        $setOnInsert: {
-          username: name,
-          email,
-          phone: '',
-          address: '',
-          bio: bio || '',
-          profileImage: profileImage || '',
-          role: 'user',
-        },
-        $set: {
-          // Keep username in sync if they choose to register with updated name
-          username: name,
-        },
-      },
-      { new: true, upsert: true }
-    );
-
-    // Ensure artisan exists (idempotent)
-    const artisan = await Artisan.findOneAndUpdate(
-      { email },
-      {
-        $setOnInsert: {
-          name,
-          email,
-          location: location || '',
-          craftTypes: craftTypes || [],
-          profileImage: profileImage || '',
-          bio: bio || profile.bio || '',
-        },
-        $set: {
-          name,
-          location: location || '',
-          craftTypes: craftTypes || [],
-          ...(profileImage ? { profileImage } : {}),
-          ...(bio ? { bio } : {}),
-        },
-      },
-      { new: true, upsert: true }
-    ).lean();
-
-    const updated = await Profile.findOneAndUpdate(
-      { email },
-      { $set: { role: 'artisan', artisanId: artisan._id } },
-      { new: true }
-    ).lean();
-
-    return res.status(200).json(updated);
-  } catch (err) {
-    if (err?.code === 11000) {
-      err.statusCode = 409;
-      err.message = 'Profile or artisan already exists';
-    }
     next(err);
   }
 }

@@ -8,10 +8,10 @@ import StoryGenerator from './components/StoryGenerator/StoryGenerator';
 import Marketplace from './components/Marketplace/Marketplace';
 import Dashboard from './components/Dashboard/Dashboard';
 import LoginPage from './components/LoginPage/LoginPage';
-import SignUpPage from './components/SignUpPage/SignUpPage';
 import ProductModal from './components/ProductModal/ProductModal';
 import ChatModal from './components/ChatModal/ChatModal';
 import Footer from './components/Footer/Footer';
+import RegisterArtisanPage from './components/RegisterArtisanPage/RegisterArtisanPage';
 
 import theme from './theme';
 import { sampleData } from './utils/data';
@@ -20,6 +20,12 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  React.useEffect(() => {
+    const handleNavigation = (e) => setCurrentPage(e.detail);
+    window.addEventListener('navigate-to', handleNavigation);
+    return () => window.removeEventListener('navigate-to', handleNavigation);
+  }, []);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -35,6 +41,8 @@ function App() {
         return <LoginPage />;
       case 'signup':
         return <SignUpPage />;
+      case 'register-artisan':
+        return <RegisterArtisanPage setCurrentPage={setCurrentPage} />;
       default:
         return <Homepage setCurrentPage={setCurrentPage} />;
     }

@@ -80,6 +80,8 @@ const Dashboard = () => {
     images: [],
   });
   const [productImagesFiles, setProductImagesFiles] = useState([]);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profileErrors, setProfileErrors] = useState({});
   const [formErrors, setFormErrors] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
@@ -233,22 +235,40 @@ const Dashboard = () => {
     });
   };
 
+  const validateProfileForm = () => {
+    const errors = {};
+    if (!effectiveProfile.username || effectiveProfile.username.length < 3) errors.username = "Username must be at least 3 characters";
+    else if (!/^[a-zA-Z0-9 ]+$/.test(effectiveProfile.username)) errors.username = "Only letters, numbers, and spaces allowed";
+    if (effectiveProfile.phone && !/^\d{10}$/.test(effectiveProfile.phone)) errors.phone = "Phone number must be exactly 10 digits";
+    if (effectiveProfile.address && (effectiveProfile.address.length < 5 || effectiveProfile.address.length > 200)) errors.address = "Address must be between 5 and 200 characters";
+    if (effectiveProfile.bio && effectiveProfile.bio.length > 300) errors.bio = "Bio cannot exceed 300 characters";
+    setProfileErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSaveProfile = async () => {
     const emailValue = effectiveProfile.email;
     if (!emailValue) return;
+    if (!validateProfileForm()) return;
     try {
       setSavingProfile(true);
       const email = encodeURIComponent(emailValue);
+
+      const formData = new FormData();
+      if (effectiveProfile.username) formData.append("username", effectiveProfile.username);
+      if (effectiveProfile.phone) formData.append("phone", effectiveProfile.phone);
+      if (effectiveProfile.address) formData.append("address", effectiveProfile.address);
+      if (effectiveProfile.bio) formData.append("bio", effectiveProfile.bio);
+      
+      if (profileImageFile) {
+        formData.append("profileImage", profileImageFile);
+      } else if (effectiveProfile.profileImage) {
+        formData.append("profileImage", effectiveProfile.profileImage);
+      }
+
       const resp = await fetch(`/api/profile?email=${email}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: effectiveProfile.username,
-          phone: effectiveProfile.phone,
-          address: effectiveProfile.address,
-          bio: effectiveProfile.bio,
-          profileImage: effectiveProfile.profileImage || undefined,
-        }),
+        body: formData,
       });
       if (!resp.ok) {
         let msg = `Failed to update profile (${resp.status})`;
@@ -262,6 +282,7 @@ const Dashboard = () => {
       }
       const data = await resp.json();
       setProfile(data);
+      setProfileImageFile(null);
       setSnackbar({
         open: true,
         message: "Profile updated successfully",
@@ -434,6 +455,7 @@ const Dashboard = () => {
           width: drawerWidth,
           flexShrink: 0,
           "& .MuiDrawer-paper": {
+            position: "relative",
             width: drawerWidth,
             boxSizing: "border-box",
             backgroundColor: "#fdf5e6",
@@ -449,8 +471,8 @@ const Dashboard = () => {
               width: "100%",
             }}
           >
-            <Avatar sx={{ bgcolor: "primary.main", width: 64, height: 64, mb: 1 }}>
-              {getUserInitials()}
+            <Avatar src={effectiveProfile.profileImage || ""} sx={{ bgcolor: "primary.main", width: 64, height: 64, mb: 1 }}>
+              {!effectiveProfile.profileImage && getUserInitials()}
             </Avatar>
             <Typography variant="h6" align="center">
               {user?.firstName || user?.fullName || "Artisan"}
@@ -493,7 +515,6 @@ const Dashboard = () => {
           px: 3,
           pt: 2,
           pb: 8,
-          minHeight: "100vh",
         }}
       >
         {activeSection === "overview" && (
@@ -621,45 +642,73 @@ const Dashboard = () => {
                 >
                   <TextField
                     label="Username"
-                  value={effectiveProfile.username || ""}
+                    value={effectiveProfile.username || ""}
                     onChange={handleProfileChange("username")}
                     fullWidth
                     required
+                    error={!!profileErrors.username}
+                    helperText={profileErrors.username}
                   />
                   <TextField
                     label="Email"
-                  value={effectiveProfile.email || ""}
+                    value={effectiveProfile.email || ""}
                     fullWidth
                     disabled
                   />
                   <TextField
                     label="Phone Number"
-                  value={effectiveProfile.phone || ""}
+                    value={effectiveProfile.phone || ""}
                     onChange={handleProfileChange("phone")}
                     fullWidth
+                    error={!!profileErrors.phone}
+                    helperText={profileErrors.phone}
                   />
                   <TextField
                     label="Address"
-                  value={effectiveProfile.address || ""}
+                    value={effectiveProfile.address || ""}
                     onChange={handleProfileChange("address")}
                     fullWidth
                     multiline
                     minRows={2}
+                    error={!!profileErrors.address}
+                    helperText={profileErrors.address}
                   />
                   <TextField
                     label="Bio"
-                  value={effectiveProfile.bio || ""}
+                    value={effectiveProfile.bio || ""}
                     onChange={handleProfileChange("bio")}
                     fullWidth
                     multiline
                     minRows={3}
+                    error={!!profileErrors.bio}
+                    helperText={profileErrors.bio}
                   />
-                  <TextField
-                    label="Profile Image URL"
-                  value={effectiveProfile.profileImage || ""}
-                    onChange={handleProfileChange("profileImage")}
-                    fullWidth
-                  />
+                  <Box>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Profile Image
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar 
+                        src={profileImageFile ? URL.createObjectURL(profileImageFile) : effectiveProfile.profileImage || ""} 
+                        sx={{ width: 64, height: 64, bgcolor: "primary.main" }}
+                      >
+                        {(!profileImageFile && !effectiveProfile.profileImage) && getUserInitials()}
+                      </Avatar>
+                      <Button variant="outlined" component="label">
+                        Upload Profile Image
+                        <input
+                          hidden
+                          type="file"
+                          accept="image/jpeg,image/png,image/jpg"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setProfileImageFile(e.target.files[0]);
+                            }
+                          }}
+                        />
+                      </Button>
+                    </Box>
+                  </Box>
                   <Box
                     sx={{
                       display: "flex",
@@ -679,7 +728,10 @@ const Dashboard = () => {
                       <Button
                         variant="outlined"
                         color="secondary"
-                        onClick={handleRegisterArtisan}
+                        onClick={() => {
+                          const event = new CustomEvent('navigate-to', { detail: 'register-artisan' });
+                          window.dispatchEvent(event);
+                        }}
                       >
                         Register as Artisan
                       </Button>
