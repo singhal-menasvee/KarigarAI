@@ -11,11 +11,6 @@ export default defineConfig({
     // allow ngrok / external hosts
     allowedHosts: ['all', 'server.allowedHosts'],
     proxy: {
-      '/api/hf': {
-        target: 'https://router.huggingface.co',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/hf/, ''),
-      },
       '/api': {
         target: 'http://localhost:5001',
         changeOrigin: true,
