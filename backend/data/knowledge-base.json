@@ -1,0 +1,161 @@
+{
+  "product": {
+    "name": "KarigarAI",
+    "description": "A web application intended to connect Indian artisans with digital commerce and AI-assisted storytelling.",
+    "current_stage": "development_prototype_early_mvp"
+  },
+  "knowledge_base_rules": {
+    "answer_only_from_verified_context": true,
+    "do_not_present_planned_features_as_available": true
+  },
+  "features": [
+    {
+      "id": "what_is_karigar_ai",
+      "category": "product",
+      "status": "implemented",
+      "keywords": ["karigar ai", "karigarai", "what is karigarai", "about karigarai", "karigar ai kya hai"],
+      "question": "What is KarigarAI?",
+      "answer": "KarigarAI is a web application designed to connect Indian artisans with digital commerce and AI-assisted storytelling. It currently includes an artisan marketplace, artisan registration and profiles, product listing, an AI chat assistant, and an AI Story Generator.",
+      "hindi_answer": "KarigarAI एक वेब एप्लिकेशन है जो भारतीय कारीगरों को डिजिटल कॉमर्स और AI की मदद से अपनी कला और उत्पादों को प्रस्तुत करने में मदद करता है।"
+    },
+    {
+      "id": "homepage",
+      "category": "navigation",
+      "status": "implemented",
+      "keywords": ["homepage", "home page", "home", "main page", "website home", "homepage kaha hai"],
+      "question": "What can I do from the KarigarAI homepage?",
+      "answer": "The homepage provides information about KarigarAI, its artisan-focused mission, navigation to the marketplace and Story Generator, and authentication prompts.",
+      "hindi_answer": "KarigarAI के homepage से आप platform की जानकारी देख सकते हैं, marketplace और Story Generator पर जा सकते हैं।"
+    },
+    {
+      "id": "sign_in",
+      "category": "authentication",
+      "status": "partially_implemented",
+      "keywords": ["signin", "sign in", "login", "log in", "account login", "login kaise kare"],
+      "question": "How do I sign in?",
+      "answer": "KarigarAI uses Clerk for authentication and provides a Sign In interface. Just click on 'Sign In' at the top of the page.",
+      "hindi_answer": "KarigarAI authentication के लिए Clerk का उपयोग करता है। आप पेज के ऊपर 'Sign In' पर क्लिक कर सकते हैं।"
+    },
+    {
+      "id": "sign_up",
+      "category": "authentication",
+      "status": "partially_implemented",
+      "keywords": ["signup", "sign up", "register", "create account", "naya account", "account banana"],
+      "question": "How do I sign up?",
+      "answer": "KarigarAI uses Clerk for account creation and a Sign Up interface exists. Please click 'Sign Up' to create a buyer or artisan account.",
+      "hindi_answer": "KarigarAI account creation के लिए Clerk का उपयोग करता है। नया अकाउंट बनाने के लिए 'Sign Up' पर क्लिक करें।"
+    },
+    {
+      "id": "profile",
+      "category": "profile",
+      "status": "implemented",
+      "keywords": ["profile", "my profile", "profile dekhna", "profile details", "account profile", "edit profile", "profile update"],
+      "question": "Can I view or edit my profile?",
+      "answer": "Yes. The Dashboard has a profile section that loads your information. You can edit your username, phone, address, bio, and upload a profile image.",
+      "hindi_answer": "हाँ। Dashboard में profile section है जहाँ आपकी profile information दिखाई जाती है, और आप इसे अपडेट भी कर सकते हैं।"
+    },
+    {
+      "id": "dashboard",
+      "category": "dashboard",
+      "status": "partially_implemented",
+      "keywords": ["dashboard", "my dashboard", "dashboard kya hai", "dashboard me kya hai", "dashboard kaise khole"],
+      "question": "What can I see in the Dashboard?",
+      "answer": "The Dashboard contains your profile information, artisan/product sections, product counts and views, and sales tips. Note: Some statistics and tables are currently sample data.",
+      "hindi_answer": "Dashboard में profile information, artisan/product sections, product count और views, sales tips दिखाई देते हैं।"
+    },
+    {
+      "id": "artisan_registration",
+      "category": "artisan",
+      "status": "implemented",
+      "keywords": ["artisan registration", "register artisan", "become artisan", "artisan form", "artisan signup", "karigar registration"],
+      "question": "How can I register as an artisan?",
+      "answer": "KarigarAI provides an artisan registration form in the Dashboard that collects personal, craft, shop/business, media, and payment-related information.",
+      "hindi_answer": "KarigarAI में artisan registration form उपलब्ध है जिसमें craft, shop/business, media और payment-related information ली जाती है।"
+    },
+    {
+      "id": "product_listing",
+      "category": "products",
+      "status": "partially_implemented",
+      "keywords": ["add product", "create product", "new product", "product listing", "upload product", "product banana", "product add"],
+      "question": "How do I add a product?",
+      "answer": "The Dashboard has a product creation form for title, category, price, stock, description, and images (up to 6 files, max 8MB each).",
+      "hindi_answer": "Dashboard में product creation form से title, category, price, stock, description और images भरकर product बनाया जा सकता है।"
+    },
+    {
+      "id": "marketplace",
+      "category": "marketplace",
+      "status": "implemented",
+      "keywords": ["marketplace", "artisan marketplace", "shop", "browse products", "products dekhna", "search products", "filter products"],
+      "question": "What is the Artisan Marketplace and how do I search it?",
+      "answer": "The Artisan Marketplace is the product-browsing area of KarigarAI. You can view product cards, and perform client-side filtering using categories.",
+      "hindi_answer": "Artisan Marketplace KarigarAI का product-browsing section है। इसमें आप products देख सकते हैं और category के आधार पर फ़िल्टर कर सकते हैं।"
+    },
+    {
+      "id": "product_details",
+      "category": "marketplace",
+      "status": "implemented",
+      "keywords": ["product details", "product information", "product modal", "product detail", "product views"],
+      "question": "How can I view product details?",
+      "answer": "Selecting a product in the marketplace opens its details view, displaying product information, views, and supporting navigation through product images.",
+      "hindi_answer": "Marketplace में product select करने पर उसकी details दिखाई जाती हैं। इसमें product information और images देखने की सुविधा है।"
+    },
+    {
+      "id": "cart_and_orders",
+      "category": "marketplace",
+      "status": "planned",
+      "keywords": ["add to cart", "cart", "shopping cart", "buy product", "orders", "order status", "payment", "pay", "checkout"],
+      "question": "Can I buy a product, track an order, or make payments?",
+      "answer": "The marketplace displays 'Add to Cart' buttons, but the complete shopping cart, checkout, payment gateways, and order tracking workflows are currently in development and coming soon.",
+      "hindi_answer": "Marketplace में 'Add to Cart' UI है, लेकिन shopping cart, payments और order tracking जैसी सुविधाएँ अभी बन रही हैं (coming soon)।"
+    },
+    {
+      "id": "story_generator",
+      "category": "ai",
+      "status": "implemented",
+      "keywords": ["story", "generate story", "ai story", "product story", "marketing story", "kahani", "story generator"],
+      "question": "What is the AI Story Generator?",
+      "answer": "The Story Generator creates marketing stories for products using artisan-entered details. It supports both English and Hindi output.",
+      "hindi_answer": "स्टोरी जेनरेटर आपके उत्पादों के लिए आकर्षक विपणन कहानियां बनाता है। यह अंग्रेजी और हिंदी दोनों में काम करता है।"
+    }
+  ],
+  "intents": {
+    "greetings": {
+      "patterns": ["hello", "hi", "hey", "namaste", "नमस्ते", "हेलो", "हाय", "good morning", "good evening"],
+      "responses": [
+        "Hello! Welcome to KarigarAI. How can I help you today?",
+        "Hi there! 👋 Looking to sell your crafts or browse artisan products?",
+        "Namaste! What would you like to know about KarigarAI?"
+      ]
+    },
+    "goodbye": {
+      "patterns": ["bye", "goodbye", "see you", "later", "अलविदा", "बाय", "talk to you later"],
+      "responses": [
+        "Goodbye! Come back soon. 👋",
+        "Thanks for visiting KarigarAI. Happy crafting!",
+        "See you later! Keep creating beautiful things. 🎨"
+      ]
+    },
+    "gratitude": {
+      "patterns": ["thanks", "thank you", "धन्यवाद", "thanks for help", "appreciate", "shukriya"],
+      "responses": [
+        "You're welcome! Happy to help. 😊",
+        "Glad I could assist! Any other questions?",
+        "Always here to help! Feel free to ask anything."
+      ]
+    },
+    "compliment": {
+      "patterns": ["good", "great", "awesome", "love", "excellent", "बहुत अच्छा", "शानदार", "nice", "cool"],
+      "responses": [
+        "Thank you! We're working hard to make KarigarAI amazing.",
+        "Happy to hear that! We appreciate your support. 🙏",
+        "That means a lot! Keep creating and selling amazing products."
+      ]
+    },
+    "unclear": {
+      "patterns": ["what", "how", "can you", "हम क्या कर सकते हैं", "help"],
+      "responses": [
+        "I can help you with KarigarAI features. Try asking:\n• How do I register as an artisan?\n• How do I add a product?\n• How do I browse the marketplace?\n• What is the story generator?"
+      ]
+    }
+  }
+}

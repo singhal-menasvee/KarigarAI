@@ -1,40 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  Button,
   TextField,
   Box,
   Typography,
   Paper,
   List,
   ListItem,
-  ListItemText,
   IconButton,
   Avatar,
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
-  Tooltip
+  Tooltip,
+  Chip
 } from '@mui/material';
-import { Close as CloseIcon, Send as SendIcon, Mic as MicIcon, MicOff as MicOffIcon } from '@mui/icons-material';
+import {
+  Close as CloseIcon,
+  Send as SendIcon,
+  Mic as MicIcon,
+  MicOff as MicOffIcon
+} from '@mui/icons-material';
 import { aiService } from '../../services/aiService';
 
 const ChatModal = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI assistant. How can I help you today?",
+      text: "Hello! I'm your KarigarAI assistant. How can I help you today?\nनमस्ते! मैं आपका कारीगर AI सहायक हूँ। आज मैं आपकी क्या मदद कर सकता हूँ?",
       sender: 'support',
-      timestamp: new Date().toLocaleTimeString(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState('en');
   const [isListening, setIsListening] = useState(false);
+  const [previousInteractionId, setPreviousInteractionId] = useState(null);
+
+  const messagesEndRef = useRef(null);
+
+  // Auto-scroll to latest message
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   // Speech Recognition Setup
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -49,7 +64,7 @@ const ChatModal = ({ isOpen, onClose }) => {
 
   const handleStartListening = () => {
     if (!recognition) {
-      alert("Voice input is not supported in this browser. Try Chrome/Edge.");
+      alert("Voice input is not supported in this browser. Try Chrome or Edge.");
       return;
     }
 
@@ -62,7 +77,7 @@ const ChatModal = ({ isOpen, onClose }) => {
 
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        setNewMessage((prev) => prev ? `${prev} ${transcript}` : transcript);
+        setNewMessage((prev) => (prev ? `${prev} ${transcript}` : transcript));
         setIsListening(false);
       };
 
@@ -77,32 +92,54 @@ const ChatModal = ({ isOpen, onClose }) => {
     }
   };
 
-
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || loading) return;
+
+    const userText = newMessage.trim();
+    const currentTimestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const userMessage = {
-      id: messages.length + 1,
-      text: newMessage,
+      id: Date.now(),
+      text: userText,
       sender: 'user',
-      timestamp: new Date().toLocaleTimeString(),
+      timestamp: currentTimestamp,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setNewMessage('');
     setLoading(true);
 
-    let reply = await aiService.chatWithAI(newMessage, [], language);
+    try {
+      // Call Interactions API through backend service
+      const res = await aiService.chatWithAI(userText, previousInteractionId, language);
 
-    const botReply = {
-      id: messages.length + 2,
-      text: reply,
-      sender: 'support',
-      timestamp: new Date().toLocaleTimeString(),
-    };
+      // Save stateful interaction ID for the next turn
+      if (res.interactionId) {
+        setPreviousInteractionId(res.interactionId);
+      }
 
-    setMessages((prev) => [...prev, botReply]);
-    setLoading(false);
+      const botReply = {
+        id: Date.now() + 1,
+        text: res.text,
+        sender: 'support',
+        tier: res.tier,
+        responseTime: res.responseTime,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+
+      setMessages((prev) => [...prev, botReply]);
+    } catch (error) {
+      const errorReply = {
+        id: Date.now() + 1,
+        text: error.message || "Sorry, I ran into an error. Please try again.",
+        sender: 'support',
+        isError: true,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, errorReply]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -110,6 +147,32 @@ const ChatModal = ({ isOpen, onClose }) => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const renderTierBadge = (tier, responseTime) => {
+    if (!tier) return null;
+    let label = '🤖 Gemini 3.6';
+    let color = 'primary';
+
+    if (tier === 'KB') {
+      label = '⚡ Fast Cache';
+      color = 'success';
+    } else if (tier === 'INTENT') {
+      label = '💬 Instant';
+      color = 'info';
+    }
+
+    return (
+      <Tooltip title={`Response time: ${responseTime || 0}ms`}>
+        <Chip
+          label={label}
+          size="small"
+          color={color}
+          variant="outlined"
+          sx={{ height: 18, fontSize: '0.65rem', ml: 1 }}
+        />
+      </Tooltip>
+    );
   };
 
   return (
@@ -125,9 +188,9 @@ const ChatModal = ({ isOpen, onClose }) => {
       <DialogTitle sx={{ pb: 1, borderBottom: 1, borderColor: 'divider' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'primary.main' }}>A</Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>K</Avatar>
             <Box>
-              <Typography variant="h6">AI Chat Assistant</Typography>
+              <Typography variant="h6">KarigarAI Support</Typography>
               <Typography variant="body2" color="text.secondary">
                 Ask me anything / पूछें कुछ भी
               </Typography>
@@ -153,53 +216,62 @@ const ChatModal = ({ isOpen, onClose }) => {
       </DialogTitle>
 
       <DialogContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 0 }}>
-        {/* Messages */}
-        <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto', bgcolor: '#f5f5f5' }}>
-          <List>
+        <Box sx={{ flexGrow: 1, p: 2, overflowY: 'auto', bgcolor: '#f8f9fa' }}>
+          <List disablePadding>
             {messages.map((m) => (
               <ListItem
                 key={m.id}
                 sx={{
                   justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start',
-                  mb: 1,
+                  mb: 1.5,
+                  p: 0,
                   alignItems: 'flex-start'
                 }}
               >
                 {m.sender !== 'user' && (
-                  <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: 'primary.main', fontSize: '0.8rem' }}>AI</Avatar>
+                  <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: 'primary.main', fontSize: '0.8rem' }}>
+                    AI
+                  </Avatar>
                 )}
                 <Paper
                   elevation={0}
                   sx={{
                     p: 2,
                     maxWidth: '75%',
-                    bgcolor: m.sender === 'user' ? 'primary.main' : 'white',
-                    color: m.sender === 'user' ? 'white' : 'text.primary',
+                    bgcolor: m.isError ? '#ffebee' : m.sender === 'user' ? 'primary.main' : 'white',
+                    color: m.isError ? 'error.main' : m.sender === 'user' ? 'white' : 'text.primary',
                     borderRadius: m.sender === 'user' ? '16px 16px 0 16px' : '16px 16px 16px 0',
                     border: m.sender !== 'user' ? 1 : 0,
-                    borderColor: 'divider'
+                    borderColor: m.isError ? 'error.light' : 'divider'
                   }}
                 >
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{m.text}</Typography>
-                  <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 1, opacity: 0.7 }}>
-                    {m.timestamp}
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-line', fontSize: '0.95rem' }}>
+                    {m.text}
                   </Typography>
-                </Paper>
-              </ListItem>
-            ))}
-            {loading && (
-              <ListItem>
-                <Paper sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Thinking...</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 1 }}>
+                    <Typography variant="caption" sx={{ opacity: 0.7, fontSize: '0.7rem' }}>
+                      {m.timestamp}
+                    </Typography>
+                    {m.sender !== 'user' && renderTierBadge(m.tier, m.responseTime)}
                   </Box>
                 </Paper>
               </ListItem>
+            ))}
+
+            {loading && (
+              <ListItem sx={{ p: 0, mb: 1 }}>
+                <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: 'primary.main', fontSize: '0.8rem' }}>
+                  AI
+                </Avatar>
+                <Paper sx={{ p: 1.5, bgcolor: 'white', borderRadius: '16px 16px 16px 0', border: 1, borderColor: 'divider' }}>
+                  <Typography variant="body2" color="text.secondary">Thinking...</Typography>
+                </Paper>
+              </ListItem>
             )}
+            <div ref={messagesEndRef} />
           </List>
         </Box>
 
-        {/* Input */}
         <Box sx={{ p: 2, bgcolor: 'white', borderTop: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
@@ -230,7 +302,13 @@ const ChatModal = ({ isOpen, onClose }) => {
               onClick={handleSendMessage}
               color="primary"
               disabled={!newMessage.trim() || loading}
-              sx={{ alignSelf: 'flex-end', bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' } }}
+              sx={{
+                alignSelf: 'flex-end',
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': { bgcolor: 'primary.dark' },
+                '&.Mui-disabled': { bgcolor: 'action.disabledBackground' }
+              }}
             >
               <SendIcon />
             </IconButton>

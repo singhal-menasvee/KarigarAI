@@ -1,0 +1,3 @@
+Cssp9bmksaGYw6
+mongodb+srv://manasvi_user:DZxukXh9fFCB7yKc@karigaraicluster.6bxytkh.mongodb.net/?appName=KarigarAICluster
+mongodb+srv://KarigarAINabh:Cssp9bmksaGYw6@karigarai.0jh0ize.mongodb.net/karigarai?retryWrites=true&w=majority&appName=KarigarAI
