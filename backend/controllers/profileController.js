@@ -8,6 +8,7 @@ export const bootstrapProfileBodySchema = z.object({
   body: z.object({
     username: z.string().trim().min(2).max(120),
     email: emailSchema,
+    role: z.enum(['user', 'buyer', 'artisan']).optional(),
   }),
   query: z.any().optional(),
   params: z.any().optional(),
@@ -15,7 +16,8 @@ export const bootstrapProfileBodySchema = z.object({
 
 export async function bootstrapProfile(req, res, next) {
   try {
-    const { username, email } = req.validated.body;
+    const { username, email, role } = req.validated.body;
+    const initialRole = role === 'artisan' ? 'artisan' : 'buyer';
     // Idempotent + race-safe: multiple bootstrap calls can happen concurrently in the UI.
     // Use upsert to avoid duplicate key errors on the unique email index.
     const doc = await Profile.findOneAndUpdate(
@@ -28,7 +30,7 @@ export async function bootstrapProfile(req, res, next) {
           address: '',
           bio: '',
           profileImage: '',
-          role: 'buyer',
+          role: initialRole,
         },
       },
       { new: true, upsert: true }

@@ -107,14 +107,19 @@ const Dashboard = () => {
         const email = encodeURIComponent(emailValue);
 
         // Ensure profile exists (automatic profile creation on first visit / signup)
+        const savedRole = sessionStorage.getItem('selected_signup_role');
         await fetch("/api/profile/bootstrap", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             username: user.fullName || user.firstName || "User",
             email: emailValue,
+            ...(savedRole ? { role: savedRole } : {}),
           }),
         });
+        if (savedRole) {
+          sessionStorage.removeItem('selected_signup_role');
+        }
 
         const resp = await fetch(`/api/profile?email=${email}`);
         if (!resp.ok) throw new Error("Failed to load profile");

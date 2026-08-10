@@ -22,16 +22,27 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: `'Merriweather', 'Roboto', serif`,
-    h1: { fontWeight: 700 },
-    h2: { fontWeight: 600 },
-    h5: { fontWeight: 500 },
-    body1: { lineHeight: 1.7 },
+    fontFamily: `'Roboto Slab', serif`,
+    h1: { fontFamily: `'Raleway', sans-serif`, fontWeight: 700 },
+    h2: { fontFamily: `'Raleway', sans-serif`, fontWeight: 700 },
+    h3: { fontFamily: `'Raleway', sans-serif`, fontWeight: 700 },
+    h4: { fontFamily: `'Raleway', sans-serif`, fontWeight: 700 },
+    h5: { fontFamily: `'Raleway', sans-serif`, fontWeight: 600 },
+    h6: { fontFamily: `'Raleway', sans-serif`, fontWeight: 600 },
+    subtitle1: { fontFamily: `'Raleway', sans-serif`, fontWeight: 600 },
+    subtitle2: { fontFamily: `'Raleway', sans-serif`, fontWeight: 500 },
+    body1: { fontFamily: `'Roboto Slab', serif`, lineHeight: 1.7 },
+    body2: { fontFamily: `'Roboto Slab', serif`, lineHeight: 1.6 },
+    button: { fontFamily: `'Raleway', sans-serif`, fontWeight: 600, textTransform: 'none' },
+    caption: { fontFamily: `'Roboto Slab', serif` },
+    overline: { fontFamily: `'Raleway', sans-serif`, fontWeight: 600 },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
+          fontFamily: `'Raleway', sans-serif`,
+          fontWeight: 600,
           borderRadius: '20px',
           textTransform: 'none',
           padding: '10px 20px',

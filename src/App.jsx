@@ -11,6 +11,7 @@ import LoginPage from './components/LoginPage/LoginPage';
 import ProductModal from './components/ProductModal/ProductModal';
 import ChatModal from './components/ChatModal/ChatModal';
 import Footer from './components/Footer/Footer';
+import SignUpPage from './components/SignUpPage/SignUpPage';
 import RegisterArtisanPage from './components/RegisterArtisanPage/RegisterArtisanPage';
 
 import theme from './theme';
@@ -38,9 +39,9 @@ function App() {
       case 'dashboard':
         return <Dashboard />;
       case 'login':
-        return <LoginPage />;
+        return <LoginPage setCurrentPage={setCurrentPage} />;
       case 'signup':
-        return <SignUpPage />;
+        return <SignUpPage setCurrentPage={setCurrentPage} />;
       case 'register-artisan':
         return <RegisterArtisanPage setCurrentPage={setCurrentPage} />;
       default:
@@ -48,53 +49,57 @@ function App() {
     }
   };
 
+  const isSignupPage = currentPage === 'signup';
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        {!isSignupPage && <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />}
         
-        <Box component="main" sx={{ flexGrow: 1, py: 4 }}>
+        <Box component="main" sx={{ flexGrow: 1, py: isSignupPage ? 0 : 4 }}>
           {renderPage()}
         </Box>
         
-        <Footer />
+        {!isSignupPage && <Footer />}
         
         {/* Chat Button */}
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            zIndex: 1000,
-          }}
-        >
+        {!isSignupPage && (
           <Box
-            component="button"
-            onClick={() => setIsChatOpen(true)}
             sx={{
-              width: 60,
-              height: 60,
-              borderRadius: '50%',
-              backgroundColor: 'primary.main',
-              color: 'white',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 3,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                backgroundColor: 'primary.dark',
-                transform: 'scale(1.1)',
-              },
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+              zIndex: 1000,
             }}
           >
-            💬
+            <Box
+              component="button"
+              onClick={() => setIsChatOpen(true)}
+              sx={{
+                width: 60,
+                height: 60,
+                borderRadius: '50%',
+                backgroundColor: 'primary.main',
+                color: 'white',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
+                  transform: 'scale(1.1)',
+                },
+              }}
+            >
+              💬
+            </Box>
           </Box>
-        </Box>
+        )}
         
         {/* Modals */}
         <ProductModal 
