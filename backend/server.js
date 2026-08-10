@@ -10,7 +10,7 @@ import productsRouter from './routes/products.js';
 import artisansRouter from './routes/artisans.js';
 import artisanRouter from './routes/artisan.js';
 import profileRouter from './routes/profile.js';
-import chatbotRouter from './routes/chatbot.js'; // 👈 ADDED HERE
+import chatbotRouter from './routes/chatbot.js'; 
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 const app = express();
@@ -39,7 +39,7 @@ app.use('/api/products', productsRouter);
 app.use('/api/artisans', artisansRouter);
 app.use('/api/artisan', artisanRouter);
 app.use('/api/profile', profileRouter);
-app.use('/api/chatbot', chatbotRouter); // 👈 ADDED HERE
+app.use('/api/chatbot', chatbotRouter); 
 
 app.use(notFound);
 app.use(errorHandler);
