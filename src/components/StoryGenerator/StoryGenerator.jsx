@@ -34,6 +34,7 @@ const StoryGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [language, setLanguage] = useState('en');
+  const [error, setError] = useState(null);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -46,11 +47,17 @@ const StoryGenerator = () => {
     e.preventDefault();
     setIsGenerating(true);
     setCopied(false);
+    setError(null);
 
-    // Call AI Service
-    const story = await aiService.generateStory(formData, language);
-    setGeneratedStory(story);
-    setIsGenerating(false);
+    try {
+      const story = await aiService.generateStory(formData, language);
+      setGeneratedStory(story);
+    } catch (err) {
+      console.error('Failed to generate story:', err);
+      setError(err.message || 'Failed to generate story. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const copyToClipboard = () => {
@@ -82,6 +89,7 @@ const StoryGenerator = () => {
       </Box>
 
       <Paper sx={{ p: 4, mb: 4 }}>
+        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
         <form onSubmit={generateStory}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
@@ -96,8 +104,8 @@ const StoryGenerator = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
+                select
                 fullWidth
-
                 label="Craft Type"
                 name="craftType"
                 value={formData.craftType}

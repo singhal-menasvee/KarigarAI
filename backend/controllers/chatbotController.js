@@ -140,3 +140,84 @@ export const handleChat = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+const generateStoryWithTemplate = (details, language) => {
+  const { artisanName, craftType, location, materials, techniques, inspiration, experience, productType } = details;
+  const name = artisanName || (language === 'hi' ? 'कारीगर' : 'The artisan');
+  const craft = craftType || (language === 'hi' ? 'हस्तशिल्प' : 'traditional craft');
+  const loc = location || (language === 'hi' ? 'भारत' : 'India');
+  const mat = materials || (language === 'hi' ? 'स्थानीय सामग्री' : 'finest materials');
+  const tech = techniques || (language === 'hi' ? 'पारंपरिक तकनीक' : 'traditional techniques');
+  const insp = inspiration || (language === 'hi' ? 'सांस्कृतिक विरासत' : 'cultural heritage');
+  const exp = experience ? `${experience}` : (language === 'hi' ? 'कई' : 'many');
+  const prod = productType || (language === 'hi' ? 'कलाकृति' : 'craft pieces');
+
+  if (language === 'hi') {
+    return `${loc} से ${name}, ${exp} वर्षों के अनुभव के साथ ${craft} के विशेषज्ञ हैं। ${mat} का उपयोग करके और ${insp} से प्रेरणा लेते हुए, ${name} ${tech} की मदद से सुंदर ${prod} बनाते हैं। प्रत्येक रचना भारत की समृद्ध सांस्कृतिक विरासत की कहानी बयां करती है।`;
+  }
+
+  return `Meet ${name}, a dedicated master of ${craft} based in ${loc} with ${exp} years of experience. Working with ${mat} and employing ${tech}, ${name} crafts unique ${prod} that embody rich artistic tradition. Deeply inspired by ${insp}, every creation carries forward the timeless story of Indian heritage and meticulous craftsmanship.`;
+};
+
+const callGeminiStoryGeneration = async (details, language) => {
+  const { artisanName, craftType, location, materials, techniques, inspiration, experience, productType } = details;
+
+  const systemInstruction = `You are a creative storyteller specializing in Indian traditional crafts and artisans for KarigarAI. Write a compelling, heartwarming, and professional 2-paragraph story highlighting the artisan's journey, dedication, techniques, materials, and passion. Return ONLY the story text. If language is 'hi', write in clear, natural Hindi.`;
+
+  const prompt = `Write a story for an artisan with these details:
+- Name: ${artisanName || 'Artisan'}
+- Craft Type: ${craftType || 'Handicrafts'}
+- Location: ${location || 'India'}
+- Experience: ${experience || 'Many'} years
+- Materials Used: ${materials || 'Natural materials'}
+- Techniques: ${techniques || 'Handcrafted traditions'}
+- Product Type: ${productType || 'Artistic craft'}
+- Inspiration: ${inspiration || 'Cultural heritage'}
+- Output Language: ${language === 'hi' ? 'Hindi' : 'English'}`;
+
+  const payload = {
+    model: 'gemini-3.6-flash',
+    input: prompt,
+    system_instruction: systemInstruction,
+  };
+
+  const interaction = await ai.interactions.create(payload);
+  return interaction.output_text;
+};
+
+export const handleGenerateStory = async (req, res) => {
+  const startTime = performance.now();
+  const { formData = {}, language = 'en' } = req.body;
+
+  try {
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        const storyText = await callGeminiStoryGeneration(formData, language);
+        if (storyText && storyText.trim()) {
+          return res.json({
+            story: storyText.trim(),
+            tier: 'LLM',
+            responseTime: parseFloat((performance.now() - startTime).toFixed(2))
+          });
+        }
+      } catch (err) {
+        console.error('[Story Generator Error] Gemini Call Failed:', err.message);
+      }
+    }
+
+    const fallbackStory = generateStoryWithTemplate(formData, language);
+    return res.json({
+      story: fallbackStory,
+      tier: 'TEMPLATE',
+      responseTime: parseFloat((performance.now() - startTime).toFixed(2))
+    });
+  } catch (error) {
+    console.error('[Story Generator Controller Error]:', error.message);
+    const fallbackStory = generateStoryWithTemplate(formData, language);
+    return res.json({
+      story: fallbackStory,
+      tier: 'TEMPLATE_FALLBACK',
+      responseTime: parseFloat((performance.now() - startTime).toFixed(2))
+    });
+  }
+};
